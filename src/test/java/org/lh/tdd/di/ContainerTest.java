@@ -15,31 +15,6 @@ class ContainerTest {
     public void setup(){
         context = new Context();
     }
-
-    interface Component{
-    }
-
-    class ComponentWithDefaultConstructor implements Component{
-        public ComponentWithDefaultConstructor() {
-        }
-    }
-
-
-    interface Dependency{ }
-
-    class ComponentWithInjectConstructor implements Component{
-        private Dependency dependency;
-
-        @Inject
-        public ComponentWithInjectConstructor(Dependency dependency) {
-            this.dependency = dependency;
-        }
-
-        public Dependency getDependency() {
-            return dependency;
-        }
-    }
-
     @Nested
     public class ComponentConstruction{
         // todo instance
@@ -102,6 +77,30 @@ class ContainerTest {
     @Nested
     public class LifecycleManagement{
 
+    }
+}
+
+
+interface Component{
+}
+
+class ComponentWithDefaultConstructor implements Component{
+    public ComponentWithDefaultConstructor() {
+    }
+}
+
+interface Dependency{ }
+
+class ComponentWithInjectConstructor implements Component{
+    private  Dependency dependency;
+
+    @Inject
+    public ComponentWithInjectConstructor(Dependency dependency) {
+        this.dependency = dependency;
+    }
+
+    public Dependency getDependency() {
+        return dependency;
     }
 }
 

@@ -4,7 +4,6 @@ import jakarta.inject.Inject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 class ContainerTest {
@@ -17,20 +16,15 @@ class ContainerTest {
     }
     @Nested
     public class ComponentConstruction{
-        // todo instance
-
 
         @Test
         void should_bind_type_to_a_specific_instance() {
             context = new Context();
-            Component instance = new Component() {
-            };
+            Component instance = new Component() {};
             context.bind(Component.class,instance);
             assertSame(instance,context.get(Component.class));
         }
 
-        // todo abstract class
-        // interface
         @Nested
         public class ConstructorInjection{
             @Test
@@ -41,12 +35,10 @@ class ContainerTest {
                 assertNotNull(instance);
                 assertTrue(instance instanceof ComponentWithDefaultConstructor);
             }
-            //todo with dependencies
 
             @Test
             void should_bind_type_to_a_class_with_inject_constructor() {
-                Dependency dependency = new Dependency() {
-                };
+                Dependency dependency = new Dependency() {};
                 context.bind(Component.class,ComponentWithInjectConstructor.class);
                 context.bind(Dependency.class, dependency);
                 Component instance = context.get(Component.class);
@@ -64,7 +56,18 @@ class ContainerTest {
                 Dependency dependency = ((ComponentWithInjectConstructor) instance).getDependency();
                 assertNotNull(dependency);
                 assertEquals("indirect dependency", ((DependencyWithInjectConstructor) dependency).getDependency());
+            }
 
+            @Test
+            void should_throw_exception_if_multi_inject_constructor_provided() {
+                assertThrows(IllegalComponentException.class,()->
+                        context.bind(Component.class,ComponentWithMultiInjectConstructor.class));
+            }
+
+            @Test
+            void should_throw_exception_if_no_inject_nor_default_constructor_provided() {
+                assertThrows(IllegalComponentException.class,()->
+                        context.bind(Component.class,ComponentWithNoInjectConstructorNorDefaultConstructor.class));
             }
         }
 
@@ -99,10 +102,24 @@ class ComponentWithDefaultConstructor implements Component{
     }
 }
 
+class ComponentWithNoInjectConstructorNorDefaultConstructor implements Component{
+    public ComponentWithNoInjectConstructorNorDefaultConstructor(String name) {
+
+    }
+}
+
+class ComponentWithMultiInjectConstructor implements Component{
+    @Inject
+    public ComponentWithMultiInjectConstructor(String name, Double value) {}
+    @Inject
+    public ComponentWithMultiInjectConstructor(String name) {
+    }
+}
+
 interface Dependency{ }
 
 class ComponentWithInjectConstructor implements Component{
-    private  Dependency dependency;
+    private final Dependency dependency;
 
     @Inject
     public ComponentWithInjectConstructor(Dependency dependency) {

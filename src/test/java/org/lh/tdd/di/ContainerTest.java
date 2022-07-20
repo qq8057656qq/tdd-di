@@ -35,7 +35,7 @@ class ContainerTest {
         }
 
         @Nested
-        public class ConstructorInjection{
+        public class ConstructorInjection {
             @Test
             public void should_bind_type_to_a_class_with_default_constructor(){
                 Context context = new Context();
@@ -84,6 +84,13 @@ class ContainerTest {
                 context.bind(Component.class,ComponentWithInjectConstructor.class);
                 assertThrows(DependencyNotFoundException.class, () -> context.get((Class<Component>) Component.class));
             }
+
+            @Test
+            void should_throw_cyclic_dependencies_found_if_depend_cyclic() {
+                context.bind(Component.class,ComponentWithInjectConstructor.class);
+                context.bind(Dependency.class, DependencyDependOnComponent.class);
+                assertThrows(CyclicDependenciesFoundException.class,()->context.get(Component.class));
+            }
         }
 
         @Nested
@@ -106,8 +113,17 @@ class ContainerTest {
     public class LifecycleManagement{
 
     }
-}
 
+
+}
+class DependencyDependOnComponent implements Dependency{
+    private Component component;
+
+    @Inject
+    public DependencyDependOnComponent(Component component) {
+        this.component = component;
+    }
+}
 
 interface Component{
 }
